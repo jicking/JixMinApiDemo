@@ -1,0 +1,6 @@
+@JixMinApi_HostAddress = http://localhost:5226
+
+GET {{JixMinApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
