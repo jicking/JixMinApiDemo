@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JixMinApi", "JixMinApi\JixMinApi.csproj", "{954F025B-5A51-442A-B5A4-D9BCCBE230CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JixMinApi", "JixMinApi\JixMinApi.csproj", "{954F025B-5A51-442A-B5A4-D9BCCBE230CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JixMinApiTests", "JixMinApiTests\JixMinApiTests.csproj", "{52E1F324-F939-4BEE-9614-1474CCA6E100}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{954F025B-5A51-442A-B5A4-D9BCCBE230CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{954F025B-5A51-442A-B5A4-D9BCCBE230CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{954F025B-5A51-442A-B5A4-D9BCCBE230CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52E1F324-F939-4BEE-9614-1474CCA6E100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E1F324-F939-4BEE-9614-1474CCA6E100}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E1F324-F939-4BEE-9614-1474CCA6E100}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E1F324-F939-4BEE-9614-1474CCA6E100}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
