@@ -5,7 +5,7 @@ A simple minimal API Demo that uses vertical slice architecture.
 - [x] Setup base feature structure
 - [x] add github action for CI
 - [ ] pass unit tests
-- [ ] add mediatr
+- [x] add mediatr
 - [ ] add app insights/logging
 - [ ] set data migration process
 - [ ] set release process

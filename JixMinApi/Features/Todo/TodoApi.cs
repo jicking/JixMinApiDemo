@@ -13,7 +13,7 @@ public static class TodoApi
 
     public static async Task<Created<Todo>> CreateTodo(TodoCreateDto input, TodoDb db)
     {
-        var todo = new Todo() { Name= input.Name, IsComplete= input.IsComplete };
+        var todo = new Todo() { Name = input.Name, IsComplete = input.IsComplete };
 
         db.Todos.Add(todo);
         await db.SaveChangesAsync();
