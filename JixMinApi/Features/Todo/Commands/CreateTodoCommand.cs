@@ -16,7 +16,8 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Resul
     {
         // add validation then set Result.ValidationErrors
 
-        var todo = new Todo() { 
+        var todo = new Todo()
+        {
             Name = request.input.Name,
             IsComplete = request.input.IsComplete,
             DateCreated = DateTimeOffset.UtcNow,

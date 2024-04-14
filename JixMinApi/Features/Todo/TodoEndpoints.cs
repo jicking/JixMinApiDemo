@@ -1,6 +1,5 @@
 ﻿using JixMinApi.Features.Todo.Commands;
 using JixMinApi.Features.Todo.Queries;
-using JixMinApi.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +27,7 @@ public static class TodoEndpoints
         return TypedResults.Ok(todos?.ToArray());
     }
 
-    public static async Task<Results<Created<TodoDto>, BadRequest> > CreateTodo(TodoCreateDto input, IMediator mediator)
+    public static async Task<Results<Created<TodoDto>, BadRequest>> CreateTodo(TodoCreateDto input, IMediator mediator)
     {
         var result = await mediator.Send(new CreateTodoCommand(input));
         if (result.IsError && result.Exception is not null)
