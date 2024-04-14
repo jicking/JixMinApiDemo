@@ -14,19 +14,26 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Resul
 
     public async Task<Result<TodoDto>> Handle(CreateTodoCommand request, CancellationToken cancellationToken)
     {
-        var todo = new Todo() { Name = request.input.Name, IsComplete = request.input.IsComplete };
+        // add validation then set Result.ValidationErrors
+
+        var todo = new Todo() { 
+            Name = request.input.Name,
+            IsComplete = request.input.IsComplete,
+            DateCreated = DateTimeOffset.UtcNow,
+        };
 
         try
         {
             await _db.Todos.AddAsync(todo);
             await _db.SaveChangesAsync();
 
-            _logger.LogInformation("Todo {Id} is successfully created", todo.Id);
-            // await _emailService.SendEmail(email);
+            _logger.LogInformation($"Todo {todo.Id} is successfully created");
+            // publish mediatr notification
+            // await _mediator.Publish(new TodoCreatedNotification(todo), cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Todo {Id} failed due to an error: {ExMessage}",
+            _logger.LogError($"Todo {todo.Id} failed due to an error: {ex.Message}",
             todo.Id, ex.Message);
             return new Result<TodoDto>(ex);
         }

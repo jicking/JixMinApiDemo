@@ -8,7 +8,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 // Api dependencies
-builder.Services.InjectTodoApiDependencies();
+builder.Services.InjectTodoEndpointServices();
 
 var app = builder.Build();
 
@@ -22,6 +22,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Map api
-app.MapTodoApi();
+app.MapTodoEndpoints();
 
 app.Run();
