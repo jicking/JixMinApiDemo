@@ -3,14 +3,14 @@
 
 public class Result<T>
 {
-    public bool IsSuccess { get; set; }
-    public T? Value { get; set; }
+    public bool IsSuccess { get; init; }
+    public T? Value { get; init; }
 
-    public bool IsError { get; set; }
-    public Exception? Exception { get; set; }
+    public bool IsError { get; init; }
+    public Exception? Exception { get; init; }
 
-    public bool HasValidationError { get; set; }
-    public List<KeyValuePair<string, string>> ValidationErrors { get; set; } = new List<KeyValuePair<string, string>>();
+    public bool HasValidationError { get; init; }
+    public List<KeyValuePair<string, string>> ValidationErrors { get; init; } = new List<KeyValuePair<string, string>>();
 
 
     public Result(T value)
