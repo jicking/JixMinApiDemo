@@ -1,6 +1,6 @@
 ﻿using JixMinApiTests.Features.Todo;
 using Xunit;
-using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using Assert = Xunit.Assert;
 
 namespace JixMinApi.Features.Todo.Queries.Tests;
 
@@ -18,7 +18,7 @@ public class GetAllTodosQueryHandlerTests
     public void GetAllTodosQueryHandlerTest()
     {
         Setup();
-        Assert.IsNotNull(sut);
+        Assert.NotNull(sut);
     }
 
     [Fact()]
@@ -26,6 +26,6 @@ public class GetAllTodosQueryHandlerTests
     {
         Setup();
         var result = await sut.Handle(new GetAllTodosQuery(), default);
-        Xunit.Assert.NotEmpty(result);
+        Assert.NotEmpty(result);
     }
 }
