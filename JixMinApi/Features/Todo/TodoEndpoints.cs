@@ -39,6 +39,7 @@ public static class TodoEndpoints
 
         group.MapGet("/{id}", GetTodoByIdAsync)
             .Produces<TodoDto>(StatusCodes.Status200OK)
+            .Produces<ValidationErrorDto>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateTodoAsync)
@@ -57,10 +58,25 @@ public static class TodoEndpoints
         return TypedResults.Ok(todos?.ToArray());
     }
 
-    public static async Task<Results<Ok<TodoDto>, NotFound>> GetTodoByIdAsync(string id, IMediator mediator)
+    public static async Task<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>> GetTodoByIdAsync(Guid id, IMediator mediator)
     {
+        if (id == Guid.Empty)
+        {
+            return TypedResults.BadRequest<ValidationErrorDto>(
+                new(
+                    ValidationErrors: [new ValidationErrorItem("id", "id must not be an empty guid.")])
+                );
+        }
+
         var todos = await mediator.Send(new GetAllTodosQuery());
-        return TypedResults.Ok(todos.FirstOrDefault());
+        var todo = todos.FirstOrDefault(t => t.Id == id);
+
+        if (todo is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return TypedResults.Ok(todo);
     }
 
     public static async Task<Results<Created<TodoDto>, BadRequest>> CreateTodoAsync(TodoCreateDto input, IMediator mediator)
