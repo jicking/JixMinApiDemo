@@ -58,6 +58,9 @@ public static class TodoEndpoints
         return TypedResults.Ok(todos?.ToArray());
     }
 
+    /// <summary>
+    /// Fetches a todo by Id
+    /// </summary>
     public static async Task<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>> GetTodoByIdAsync(Guid id, IMediator mediator)
     {
         if (id == Guid.Empty)
@@ -79,6 +82,21 @@ public static class TodoEndpoints
         return TypedResults.Ok(todo);
     }
 
+    /// <summary>
+    /// Creates a new todo
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /Todo
+    ///     {
+    ///        "name": "Item #1",
+    ///        "isComplete": true
+    ///     }
+    ///
+    /// </remarks>
+    /// <response code="201">Returns the newly created item</response>
+    /// <response code="400">Invalid payload</response>
     public static async Task<Results<Created<TodoDto>, BadRequest>> CreateTodoAsync(TodoCreateDto input, IMediator mediator)
     {
         var result = await mediator.Send(new CreateTodoCommand(input));
