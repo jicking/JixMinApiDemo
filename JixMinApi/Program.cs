@@ -1,4 +1,5 @@
 using JixMinApi.Features.Todo;
+using JixMinApi.Shared;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
@@ -23,7 +24,10 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 // Inject endpoint services
-builder.Services.InjectTodoEndpointServices();
+builder.Services.AddTodoEndpointServices();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -35,8 +39,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Map Endpoints
-app.MapTodoEndpoints();
+app.UseExceptionHandler();
+app.UseTodoEndpoints();
 
 app.Run();

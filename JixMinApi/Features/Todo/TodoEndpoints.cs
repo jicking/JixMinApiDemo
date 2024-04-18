@@ -10,12 +10,12 @@ namespace JixMinApi.Features.Todo;
 
 public static class TodoEndpoints
 {
-    public static void InjectTodoEndpointServices(this IServiceCollection services)
+    public static void AddTodoEndpointServices(this IServiceCollection services)
     {
         services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase(Constants.TodoApiGroupName));
     }
 
-    public static void MapTodoEndpoints(this WebApplication app)
+    public static void UseTodoEndpoints(this WebApplication app)
     {
         var group = app.MapGroup(Constants.TodoApiRootPath)
             .WithOpenApi(x => new OpenApiOperation(x)
