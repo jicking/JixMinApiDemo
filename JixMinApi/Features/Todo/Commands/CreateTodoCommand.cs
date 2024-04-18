@@ -1,5 +1,4 @@
-﻿using JixMinApi.Shared;
-using MediatR;
+﻿using MediatR;
 
 namespace JixMinApi.Features.Todo.Commands;
 
@@ -14,7 +13,11 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Resul
 
     public async Task<Result<TodoDto>> Handle(CreateTodoCommand request, CancellationToken cancellationToken)
     {
-        // add validation then set Result.ValidationErrors
+        // simple inline validation, if needed validate using behaviors https://github.com/jbogard/MediatR/wiki/Behaviors
+        if (string.IsNullOrEmpty(request.input.Name))
+        {
+            return new Result<TodoDto>([new KeyValuePair<string, string[]>("Name", ["Must not be empty."])]);
+        }
 
         var todo = new Todo()
         {
@@ -23,21 +26,13 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Resul
             DateCreated = DateTimeOffset.UtcNow,
         };
 
-        try
-        {
-            await _db.Todos.AddAsync(todo);
-            await _db.SaveChangesAsync();
+        await _db.Todos.AddAsync(todo);
+        await _db.SaveChangesAsync();
 
-            _logger.LogInformation($"Todo {todo.Id} is successfully created");
-            // publish mediatr notification
-            // await _mediator.Publish(new TodoCreatedNotification(todo), cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Todo {todo.Id} failed due to an error: {ex.Message}",
-            todo.Id, ex.Message);
-            return new Result<TodoDto>(ex);
-        }
+        _logger.LogInformation($"Todo {todo.Id} is successfully created");
+
+        // publish mediatr notification https://github.com/jbogard/MediatR/wiki#notifications
+        // await _mediator.Publish(new TodoCreatedNotification(todo), cancellationToken);
 
         return new Result<TodoDto>(todo.ToDto());
     }

@@ -16,23 +16,24 @@ public class TodoEndpointsTests
         // Arrange
         var mediatorMock = new Mock<IMediator>();
         var emptyId = Guid.Empty;
-        var expectedBadRequest = new ValidationErrorDto(
-            [new ValidationErrorItem("id", "id must not be an empty guid.")]
-        );
+        var expectedErrors = new Dictionary<string, string[]>
+        {
+            ["id"] = ["id parameter must not be an empty guid."],
+        };
 
         // Act
         var response = await TodoEndpoints.GetTodoByIdAsync(emptyId, mediatorMock.Object);
 
         // Assert
-        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(response);
+        Assert.IsType<Results<ValidationProblem, NotFound, Ok<TodoDto>>>(response);
 
-        var result = (BadRequest<ValidationErrorDto>)response.Result;
+        var result = (ValidationProblem)response.Result;
         Assert.NotNull(result);
         Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
 
-        var value = Assert.IsType<ValidationErrorDto>(result.Value);
-        Assert.True(value.ValidationErrors.Any());
-        Assert.Equal(expectedBadRequest.ValidationErrors.FirstOrDefault(), value.ValidationErrors.FirstOrDefault());
+        var value = Assert.IsType<HttpValidationProblemDetails>(result.ProblemDetails);
+        Assert.True(value.Errors.Any());
+        Assert.Equal(expectedErrors.FirstOrDefault(), value.Errors.FirstOrDefault());
     }
 
     [Fact]
@@ -48,8 +49,8 @@ public class TodoEndpointsTests
         var response = await TodoEndpoints.GetTodoByIdAsync(nonExistentId, mediatorMock.Object);
 
         // Assert
-        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(response);
-        
+        Assert.IsType<Results<ValidationProblem, NotFound, Ok<TodoDto>>>(response);
+
         var result = (NotFound)response.Result;
         Assert.NotNull(result);
         Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
@@ -72,8 +73,8 @@ public class TodoEndpointsTests
         var response = await TodoEndpoints.GetTodoByIdAsync(existingId, mediatorMock.Object);
 
         // Assert
-        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(response);
-        
+        Assert.IsType<Results<ValidationProblem, NotFound, Ok<TodoDto>>>(response);
+
         var result = (Ok<TodoDto>)response.Result;
         Assert.NotNull(result);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);

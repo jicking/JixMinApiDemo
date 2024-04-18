@@ -39,13 +39,13 @@ public static class TodoEndpoints
 
         group.MapGet("/{id}", GetTodoByIdAsync)
             .Produces<TodoDto>(StatusCodes.Status200OK)
-            .Produces<ValidationErrorDto>(StatusCodes.Status400BadRequest)
+            .Produces<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateTodoAsync)
             .Accepts<TodoCreateDto>(MediaTypeNames.Application.Json)
             .Produces<TodoDto>(StatusCodes.Status201Created)
-            .Produces<ValidationErrorDto>(StatusCodes.Status400BadRequest);
+            .Produces<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest);
 
         //group.MapDelete("/{id}", GetAllTodosAsync)
         //    .Produces(StatusCodes.Status204NoContent)
@@ -61,14 +61,15 @@ public static class TodoEndpoints
     /// <summary>
     /// Fetches a todo by Id
     /// </summary>
-    public static async Task<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>> GetTodoByIdAsync(Guid id, IMediator mediator)
+    public static async Task<Results<ValidationProblem, NotFound, Ok<TodoDto>>> GetTodoByIdAsync(Guid id, IMediator mediator)
     {
         if (id == Guid.Empty)
         {
-            return TypedResults.BadRequest<ValidationErrorDto>(
-                new(
-                    ValidationErrors: [new ValidationErrorItem("id", "id must not be an empty guid.")])
-                );
+            var errors = new Dictionary<string, string[]>
+            {
+                ["id"] = ["id parameter must not be an empty guid."],
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         var todos = await mediator.Send(new GetAllTodosQuery());
@@ -97,17 +98,13 @@ public static class TodoEndpoints
     /// </remarks>
     /// <response code="201">Returns the newly created item</response>
     /// <response code="400">Invalid payload</response>
-    public static async Task<Results<Created<TodoDto>, BadRequest>> CreateTodoAsync(TodoCreateDto input, IMediator mediator)
+    public static async Task<Results<Created<TodoDto>, ValidationProblem>> CreateTodoAsync(TodoCreateDto input, IMediator mediator)
     {
         var result = await mediator.Send(new CreateTodoCommand(input));
-        if (result.IsError && result.Exception is not null)
-        {
-            throw result.Exception;
-        }
 
-        if (result.HasValidationError && result.ValidationErrors.Any())
+        if (result.HasValidationError)
         {
-            return TypedResults.BadRequest();
+            return TypedResults.ValidationProblem(result.ValidationErrors.ToDictionary());
         }
 
         var todo = result.Value;
