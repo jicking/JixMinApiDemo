@@ -16,18 +16,23 @@ public class TodoEndpointsTests
         // Arrange
         var mediatorMock = new Mock<IMediator>();
         var emptyId = Guid.Empty;
-        var expectedBadRequest = TypedResults.BadRequest<ValidationErrorDto>(
-            new ValidationErrorDto(
-                [new ValidationErrorItem("id", "id must not be an empty guid.")]
-            ));
+        var expectedBadRequest = new ValidationErrorDto(
+            [new ValidationErrorItem("id", "id must not be an empty guid.")]
+        );
 
         // Act
-        var result = await TodoEndpoints.GetTodoByIdAsync(emptyId, mediatorMock.Object);
+        var response = await TodoEndpoints.GetTodoByIdAsync(emptyId, mediatorMock.Object);
 
         // Assert
-        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(result);
-        var badrequest = (BadRequest<ValidationErrorDto>)result.Result;
-        Assert.NotNull(badrequest);
+        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(response);
+
+        var result = (BadRequest<ValidationErrorDto>)response.Result;
+        Assert.NotNull(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
+
+        var value = Assert.IsType<ValidationErrorDto>(result.Value);
+        Assert.True(value.ValidationErrors.Any());
+        Assert.Equal(expectedBadRequest.ValidationErrors.FirstOrDefault(), value.ValidationErrors.FirstOrDefault());
     }
 
     [Fact]
@@ -40,13 +45,14 @@ public class TodoEndpointsTests
             .ReturnsAsync(new List<TodoDto>());
 
         // Act
-        var result = await TodoEndpoints.GetTodoByIdAsync(nonExistentId, mediatorMock.Object);
+        var response = await TodoEndpoints.GetTodoByIdAsync(nonExistentId, mediatorMock.Object);
 
         // Assert
-        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(result);
-        var notFoundResult = (NotFound)result.Result;
-
-        Assert.NotNull(notFoundResult);
+        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(response);
+        
+        var result = (NotFound)response.Result;
+        Assert.NotNull(result);
+        Assert.Equal(StatusCodes.Status404NotFound, result.StatusCode);
     }
 
     [Fact]
@@ -55,7 +61,7 @@ public class TodoEndpointsTests
         // Arrange
         var mediatorMock = new Mock<IMediator>();
         var existingId = Guid.NewGuid(); // Assuming this id exists
-        var todoDto = new TodoDto(existingId, "", false); // Assuming todo with this id exists
+        var todoDto = new TodoDto(existingId, "Test name", false); // Assuming todo with this id exists
 
         mediatorMock.Setup(m => m.Send(It.IsAny<GetAllTodosQuery>(), CancellationToken.None))
             .ReturnsAsync(new List<TodoDto>() {
@@ -63,13 +69,14 @@ public class TodoEndpointsTests
             });
 
         // Act
-        var result = await TodoEndpoints.GetTodoByIdAsync(existingId, mediatorMock.Object);
+        var response = await TodoEndpoints.GetTodoByIdAsync(existingId, mediatorMock.Object);
 
         // Assert
-        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(result);
-        var okResult = (Ok<TodoDto>)result.Result;
-
-        Assert.NotNull(okResult);
-        Assert.Equal(todoDto, okResult.Value);
+        Assert.IsType<Results<BadRequest<ValidationErrorDto>, NotFound, Ok<TodoDto>>>(response);
+        
+        var result = (Ok<TodoDto>)response.Result;
+        Assert.NotNull(result);
+        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+        Assert.Equal(todoDto, result.Value);
     }
 }
