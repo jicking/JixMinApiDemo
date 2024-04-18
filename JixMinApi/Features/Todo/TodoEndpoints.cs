@@ -100,11 +100,11 @@ public static class TodoEndpoints
     /// <response code="400">Invalid payload</response>
     public static async Task<Results<Created<TodoDto>, ValidationProblem>> CreateTodoAsync(CreateTodoDto input, IMediator mediator)
     {
-        var result = await mediator.Send(new CreateTodoCommand(input));
+        var result = await mediator.Send(new CreateTodoCommand(input.Name, input.IsComplete));
 
-        if (result.HasValidationError)
+        if (!result.IsSuccess)
         {
-            return TypedResults.ValidationProblem(result.ValidationErrors.ToDictionary());
+            return TypedResults.ValidationProblem(result.Errors.ToErrorDictionary());
         }
 
         var todo = result.Value;

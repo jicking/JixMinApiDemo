@@ -1,5 +1,7 @@
+using FluentValidation;
 using JixMinApi.Features.Todo;
 using JixMinApi.Shared;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
@@ -21,13 +23,13 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-// Inject endpoint services
-builder.Services.AddTodoEndpointServices();
-
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddTodoEndpointServices();
 
 var app = builder.Build();
 
@@ -38,8 +40,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseExceptionHandler();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+    app.UseExceptionHandler();
+}
+
 app.UseTodoEndpoints();
 
 app.Run();

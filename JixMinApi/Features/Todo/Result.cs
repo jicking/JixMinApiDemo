@@ -3,39 +3,44 @@
 
 public class Result<T>
 {
-    public bool IsSuccess => (!HasValidationError && !IsError);
+    public bool IsSuccess => !Errors.Any();
     public T? Value { get; init; }
-
-    public bool HasValidationError { get; init; }
-    public IReadOnlyList<KeyValuePair<string, string[]>> ValidationErrors { get; init; } = [];
-
-    public bool IsError { get; init; }
-    public Exception? Exception { get; init; }
-
+    public IReadOnlyList<KeyValuePair<string, string>> Errors { get; init; } = [];
 
     public Result(T value)
     {
         Value = value;
     }
 
-    public Result(IEnumerable<KeyValuePair<string, string[]>> validationErrors)
+    public Result(IEnumerable<KeyValuePair<string, string>> validationErrors)
     {
-        ValidationErrors = validationErrors.ToList();
-        HasValidationError = true;
+        Errors = validationErrors.ToList();
     }
 
     public Result(string field, string validationErrorMessage)
     {
-        List<KeyValuePair<string, string[]>> validationErrors
-            = [new KeyValuePair<string, string[]>(field, [validationErrorMessage])];
-        ValidationErrors = validationErrors;
-        HasValidationError = true;
-    }
-
-    public Result(Exception exception)
-    {
-        Exception = exception;
-        IsError = true;
+        Errors = [new(field, validationErrorMessage)];
     }
 }
 
+public static class ResultExtensions
+{
+    public static IDictionary<string, string[]> ToErrorDictionary(this IEnumerable<KeyValuePair<string, string>> errors)
+    {
+        Dictionary<string, string[]> result = [];
+
+        foreach (var e in errors)
+        {
+            if (!result.TryGetValue(e.Key, out var messages))
+            {
+                result[e.Key] = [e.Value];
+                continue;
+            }
+
+            var newArray = messages.Concat([e.Value]).ToArray();
+            result[e.Key] = newArray;
+        }
+
+        return result;
+    }
+}

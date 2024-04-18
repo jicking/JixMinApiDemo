@@ -22,15 +22,30 @@ public class CreateTodoCommandHandlerTests
     }
 
     [Fact()]
-    public async void HandleTest()
+    public async void Handle_OkTest()
     {
         Setup();
-        var input = new CreateTodoDto("Test", true);
-        var result = await sut.Handle(new CreateTodoCommand(input), default);
+        const string todoName = "Test";
+
+        var result = await sut.Handle(new CreateTodoCommand(todoName, true), default);
 
         Assert.NotNull(result);
         Assert.True(result.IsSuccess);
-        Assert.Equal(input.Name, result.Value.Name);
-        Assert.Equal(input.IsComplete, result.Value.IsComplete);
+        Assert.Equal(todoName, result.Value.Name);
+        Assert.True(result.Value.IsComplete);
+    }
+
+    [Theory()]
+    [InlineData("")]
+    [InlineData("TES")]
+    public async void Handle_ReturnsFailureWhenNameIsNotValid(string name)
+    {
+        Setup();
+
+        var result = await sut.Handle(new CreateTodoCommand(name, true), default);
+
+        Assert.NotNull(result);
+        Assert.False(result.IsSuccess);
+        Assert.True(result.Errors.Any());
     }
 }

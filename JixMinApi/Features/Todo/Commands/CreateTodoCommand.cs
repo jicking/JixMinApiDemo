@@ -1,8 +1,22 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using MediatR;
 
 namespace JixMinApi.Features.Todo.Commands;
 
-public record CreateTodoCommand(CreateTodoDto input) : IRequest<Result<TodoDto>>;
+public record CreateTodoCommand(string Name, bool IsComplete) : IRequest<Result<TodoDto>>;
+
+public sealed class CreateTodoCommandValidator
+    : AbstractValidator<CreateTodoCommand>
+{
+    public CreateTodoCommandValidator()
+    {
+        RuleFor(command => command.Name)
+            .NotEmpty()
+            .MinimumLength(4)
+            .MaximumLength(24);
+    }
+}
 
 public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Result<TodoDto>>
 {
@@ -13,16 +27,20 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Resul
 
     public async Task<Result<TodoDto>> Handle(CreateTodoCommand request, CancellationToken cancellationToken)
     {
-        // simple inline validation, if needed validate using behaviors https://github.com/jbogard/MediatR/wiki/Behaviors
-        if (string.IsNullOrEmpty(request.input.Name))
+        // fluent validation inside handler, if needed validate on pipeline using behaviors https://github.com/jbogard/MediatR/wiki/Behaviors
+        var validator = new CreateTodoCommandValidator();
+        ValidationResult validationResult = validator.Validate(request);
+
+        if (!validationResult.IsValid)
         {
-            return new Result<TodoDto>([new KeyValuePair<string, string[]>("Name", ["Must not be empty."])]);
+            var errors = validationResult.Errors.Select(e => new KeyValuePair<string, string>(e.PropertyName, e.ErrorMessage));
+            return new Result<TodoDto>(errors);
         }
 
         var todo = new Todo()
         {
-            Name = request.input.Name,
-            IsComplete = request.input.IsComplete,
+            Name = request.Name,
+            IsComplete = request.IsComplete,
             DateCreated = DateTimeOffset.UtcNow,
         };
 
