@@ -43,7 +43,7 @@ public static class TodoEndpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateTodoAsync)
-            .Accepts<TodoCreateDto>(MediaTypeNames.Application.Json)
+            .Accepts<CreateTodoDto>(MediaTypeNames.Application.Json)
             .Produces<TodoDto>(StatusCodes.Status201Created)
             .Produces<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest);
 
@@ -98,7 +98,7 @@ public static class TodoEndpoints
     /// </remarks>
     /// <response code="201">Returns the newly created item</response>
     /// <response code="400">Invalid payload</response>
-    public static async Task<Results<Created<TodoDto>, ValidationProblem>> CreateTodoAsync(TodoCreateDto input, IMediator mediator)
+    public static async Task<Results<Created<TodoDto>, ValidationProblem>> CreateTodoAsync(CreateTodoDto input, IMediator mediator)
     {
         var result = await mediator.Send(new CreateTodoCommand(input));
 

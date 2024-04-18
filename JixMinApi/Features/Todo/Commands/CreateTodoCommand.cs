@@ -2,7 +2,7 @@
 
 namespace JixMinApi.Features.Todo.Commands;
 
-public record CreateTodoCommand(TodoCreateDto input) : IRequest<Result<TodoDto>>;
+public record CreateTodoCommand(CreateTodoDto input) : IRequest<Result<TodoDto>>;
 
 public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Result<TodoDto>>
 {

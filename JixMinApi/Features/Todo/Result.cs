@@ -3,20 +3,19 @@
 
 public class Result<T>
 {
-    public bool IsSuccess { get; init; }
+    public bool IsSuccess => (!HasValidationError && !IsError);
     public T? Value { get; init; }
 
     public bool HasValidationError { get; init; }
     public IReadOnlyList<KeyValuePair<string, string[]>> ValidationErrors { get; init; } = [];
 
-    //public bool IsError { get; init; }
-    //public Exception? Exception { get; init; }
+    public bool IsError { get; init; }
+    public Exception? Exception { get; init; }
 
 
     public Result(T value)
     {
         Value = value;
-        IsSuccess = true;
     }
 
     public Result(IEnumerable<KeyValuePair<string, string[]>> validationErrors)
@@ -31,6 +30,12 @@ public class Result<T>
             = [new KeyValuePair<string, string[]>(field, [validationErrorMessage])];
         ValidationErrors = validationErrors;
         HasValidationError = true;
+    }
+
+    public Result(Exception exception)
+    {
+        Exception = exception;
+        IsError = true;
     }
 }
 

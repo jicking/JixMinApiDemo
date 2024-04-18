@@ -25,7 +25,7 @@ public class CreateTodoCommandHandlerTests
     public async void HandleTest()
     {
         Setup();
-        var input = new TodoCreateDto("Test", true);
+        var input = new CreateTodoDto("Test", true);
         var result = await sut.Handle(new CreateTodoCommand(input), default);
 
         Assert.NotNull(result);
