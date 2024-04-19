@@ -29,6 +29,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddTodoEndpointServices();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -46,5 +47,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseTodoEndpoints();
+app.MapHealthChecks("/healthz");
 
 app.Run();

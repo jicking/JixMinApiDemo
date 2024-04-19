@@ -27,7 +27,7 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Resul
 
     public async Task<Result<TodoDto>> Handle(CreateTodoCommand request, CancellationToken cancellationToken)
     {
-        // fluent validation inside handler, if needed validate on pipeline using behaviors https://github.com/jbogard/MediatR/wiki/Behaviors
+        // if needed validate on pipeline using behaviors (but youll have to catch and handle ValidationException, yikes) https://github.com/jbogard/MediatR/wiki/Behaviors
         var validator = new CreateTodoCommandValidator();
         ValidationResult validationResult = validator.Validate(request);
 
