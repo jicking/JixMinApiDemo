@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -46,7 +45,7 @@ public class TodoEndpointsTests
         var mediatorMock = new Mock<IMediator>();
         var nonExistentId = Guid.NewGuid(); // Assuming this id doesn't exist
         mediatorMock.Setup(m => m.Send(It.IsAny<GetTodoByIdQuery>(), CancellationToken.None))
-            .ReturnsAsync(Result<TodoDto>.NotFound<TodoDto>());
+            .ReturnsAsync(Result<TodoDto>.NotFound());
 
         // Act
         var response = await TodoEndpoints.GetTodoByIdAsync(nonExistentId, mediatorMock.Object);

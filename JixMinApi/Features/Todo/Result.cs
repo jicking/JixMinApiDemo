@@ -3,12 +3,18 @@
 
 public class Result<T>
 {
-    public bool IsSuccess => !Errors.Any();
+    public bool IsSuccess => !Errors.Any() && !IsNotFound;
     public T? Value { get; init; }
     public IReadOnlyList<KeyValuePair<string, string>> Errors { get; init; } = [];
+    public bool IsNotFound { get; set; }
 
     public Result(T value)
     {
+        if (value is null)
+        {
+            IsNotFound = true;
+        }
+
         Value = value;
     }
 
@@ -22,10 +28,9 @@ public class Result<T>
         Errors = [new(field, validationErrorMessage)];
     }
 
-    // TODO: using NotFound still Result.IsSuccess to true, will lead to bugs
-    public static Result<T> NotFound<T>()
+    public static Result<T> NotFound()
     {
-        T val = default(T);
+        T val = default;
         return new Result<T>(val);
     }
 }

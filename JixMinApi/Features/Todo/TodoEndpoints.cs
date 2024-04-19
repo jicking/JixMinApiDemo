@@ -67,12 +67,10 @@ public static class TodoEndpoints
 
         if (!result.IsSuccess)
         {
-            return TypedResults.ValidationProblem(result.Errors.ToErrorDictionary());
-        }
-
-        if (result.Value is null)
-        {
-            return TypedResults.NotFound();
+            if (result.IsNotFound)
+                return TypedResults.NotFound();
+            else
+                return TypedResults.ValidationProblem(result.Errors.ToErrorDictionary());
         }
 
         return TypedResults.Ok(result.Value);
@@ -103,6 +101,6 @@ public static class TodoEndpoints
         }
 
         var todo = result.Value;
-        return TypedResults.Created($"{Constants.TodoApiRootPath}/{todo.Id}", todo);
+        return TypedResults.Created($"{Constants.TodoApiRootPath}/{todo!.Id}", todo);
     }
 }

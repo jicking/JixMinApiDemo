@@ -1,12 +1,11 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using JixMinApi.Features.Todo.Commands;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace JixMinApi.Features.Todo.Queries;
 
-public record GetTodoByIdQuery(Guid Id) :IRequest<Result<TodoDto>>;
+public record GetTodoByIdQuery(Guid Id) : IRequest<Result<TodoDto>>;
 
 public sealed class GetTodoByIdQueryValidator
     : AbstractValidator<GetTodoByIdQuery>

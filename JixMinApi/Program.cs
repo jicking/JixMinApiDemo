@@ -1,7 +1,6 @@
 using FluentValidation;
 using JixMinApi.Features.Todo;
 using JixMinApi.Shared;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
