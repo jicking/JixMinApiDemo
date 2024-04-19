@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -20,6 +21,8 @@ public class TodoEndpointsTests
         {
             ["id"] = ["id parameter must not be an empty guid."],
         };
+        mediatorMock.Setup(m => m.Send(It.IsAny<GetTodoByIdQuery>(), CancellationToken.None))
+            .ReturnsAsync(new Result<TodoDto>("id", "id parameter must not be an empty guid."));
 
         // Act
         var response = await TodoEndpoints.GetTodoByIdAsync(emptyId, mediatorMock.Object);
@@ -42,8 +45,8 @@ public class TodoEndpointsTests
         // Arrange
         var mediatorMock = new Mock<IMediator>();
         var nonExistentId = Guid.NewGuid(); // Assuming this id doesn't exist
-        mediatorMock.Setup(m => m.Send(It.IsAny<GetAllTodosQuery>(), CancellationToken.None))
-            .ReturnsAsync(new List<TodoDto>());
+        mediatorMock.Setup(m => m.Send(It.IsAny<GetTodoByIdQuery>(), CancellationToken.None))
+            .ReturnsAsync(Result<TodoDto>.NotFound<TodoDto>());
 
         // Act
         var response = await TodoEndpoints.GetTodoByIdAsync(nonExistentId, mediatorMock.Object);
@@ -64,10 +67,8 @@ public class TodoEndpointsTests
         var existingId = Guid.NewGuid(); // Assuming this id exists
         var todoDto = new TodoDto(existingId, "Test name", false); // Assuming todo with this id exists
 
-        mediatorMock.Setup(m => m.Send(It.IsAny<GetAllTodosQuery>(), CancellationToken.None))
-            .ReturnsAsync(new List<TodoDto>() {
-                todoDto
-            });
+        mediatorMock.Setup(m => m.Send(It.IsAny<GetTodoByIdQuery>(), CancellationToken.None))
+            .ReturnsAsync(new Result<TodoDto>(todoDto));
 
         // Act
         var response = await TodoEndpoints.GetTodoByIdAsync(existingId, mediatorMock.Object);

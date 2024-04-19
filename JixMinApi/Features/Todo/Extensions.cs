@@ -7,7 +7,7 @@ public static class Extensions
         return new TodoDto(model.Id, model.Name, model.IsComplete);
     }
 
-    public static List<TodoDto> ToDto(this IList<Todo> model)
+    public static List<TodoDto> ToDto(this IEnumerable<Todo> model)
     {
         var result = new List<TodoDto>();
         foreach (var item in model)

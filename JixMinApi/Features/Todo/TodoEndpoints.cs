@@ -63,24 +63,19 @@ public static class TodoEndpoints
     /// </summary>
     public static async Task<Results<ValidationProblem, NotFound, Ok<TodoDto>>> GetTodoByIdAsync(Guid id, IMediator mediator)
     {
-        if (id == Guid.Empty)
+        var result = await mediator.Send(new GetTodoByIdQuery(id));
+
+        if (!result.IsSuccess)
         {
-            var errors = new Dictionary<string, string[]>
-            {
-                ["id"] = ["id parameter must not be an empty guid."],
-            };
-            return TypedResults.ValidationProblem(errors);
+            return TypedResults.ValidationProblem(result.Errors.ToErrorDictionary());
         }
 
-        var todos = await mediator.Send(new GetAllTodosQuery());
-        var todo = todos.FirstOrDefault(t => t.Id == id);
-
-        if (todo is null)
+        if (result.Value is null)
         {
             return TypedResults.NotFound();
         }
 
-        return TypedResults.Ok(todo);
+        return TypedResults.Ok(result.Value);
     }
 
     /// <summary>

@@ -21,6 +21,13 @@ public class Result<T>
     {
         Errors = [new(field, validationErrorMessage)];
     }
+
+    // TODO: using NotFound still Result.IsSuccess to true, will lead to bugs
+    public static Result<T> NotFound<T>()
+    {
+        T val = default(T);
+        return new Result<T>(val);
+    }
 }
 
 public static class ResultExtensions
