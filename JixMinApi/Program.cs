@@ -2,51 +2,79 @@ using FluentValidation;
 using JixMinApi.Features.Todo;
 using JixMinApi.Shared;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Formatting.Compact;
 using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File(new CompactJsonFormatter(), "Logs/applog-.txt", rollingInterval: RollingInterval.Day)
+    .CreateBootstrapLogger();
 
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+Log.Information("App Starting up ===================");
+
+try
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add services to the container.
+    builder.Services.AddSerilog((services, lc) => lc
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
+
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(options =>
     {
-        Version = "v1",
-        Title = "JixMinApi Demo",
-        Description = "A simple minimal API Demo that uses vertical slice architecture.",
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "JixMinApi Demo",
+            Description = "A simple minimal API Demo that uses vertical slice architecture.",
+        });
+
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        options.IncludeXmlComments(xmlPath);
     });
 
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    options.IncludeXmlComments(xmlPath);
-});
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
+    builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    builder.Services.AddTodoEndpointServices();
+    builder.Services.AddHealthChecks();
 
-builder.Services.AddTodoEndpointServices();
-builder.Services.AddHealthChecks();
+    var app = builder.Build();
 
-var app = builder.Build();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+        app.UseExceptionHandler();
+    }
+
+    app.UseSerilogRequestLogging();
+    app.UseTodoEndpoints();
+    app.MapHealthChecks("/healthz");
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Log.Fatal(ex, "App terminated unexpectedly ===================");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-    app.UseExceptionHandler();
-}
 
-app.UseTodoEndpoints();
-app.MapHealthChecks("/healthz");
-
-app.Run();
