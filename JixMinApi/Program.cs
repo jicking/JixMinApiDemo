@@ -48,18 +48,18 @@ try
     builder.Services.AddHealthChecks();
 
     var app = builder.Build();
+    app.UseHttpsRedirection();
 
-    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseStatusCodePages();
+        app.UseExceptionHandler();
+    }
+
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
         app.UseSwaggerUI();
-    }
-
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseHttpsRedirection();
-        app.UseExceptionHandler();
     }
 
     app.UseSerilogRequestLogging();

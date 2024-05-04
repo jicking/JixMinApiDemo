@@ -2,6 +2,7 @@
 using JixMinApi.Features.Todo.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Net.Mime;
@@ -40,12 +41,15 @@ public static class TodoEndpoints
         group.MapGet("/{id}", GetTodoByIdAsync)
             .Produces<TodoDto>(StatusCodes.Status200OK)
             .Produces<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
 
         group.MapPost("/", CreateTodoAsync)
             .Accepts<CreateTodoDto>(MediaTypeNames.Application.Json)
             .Produces<TodoDto>(StatusCodes.Status201Created)
-            .Produces<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
         //group.MapDelete("/{id}", GetAllTodosAsync)
         //    .Produces(StatusCodes.Status204NoContent)
